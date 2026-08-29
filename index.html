@@ -2,8 +2,10 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <base href="./">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Spoty Pro</title>
+  <link rel="icon" href="data:,">
   <style>
     :root {
       --bg-dark: #121212;
@@ -100,7 +102,6 @@
     </div>
   </div>
 
-  <!-- Preload audio metadata instantly -->
   <audio id="audio" preload="metadata"></audio>
 
   <script>
@@ -144,7 +145,7 @@
     ];
 
     function formatPath(filename) {
-      return './' + filename.split('/').map(part => encodeURI(part)).join('/');
+      return encodeURIComponent(filename).replace(/%2F/g, "/");
     }
 
     let songs = files.map(file => ({
@@ -182,7 +183,6 @@
       });
     }
 
-    // Preload next track silently in background
     function preloadNextTrack() {
       if (currentIndex >= 0 && currentIndex < songs.length - 1) {
         const nextTrackUrl = songs[currentIndex + 1].path;
@@ -212,7 +212,7 @@
       audio.pause();
       currentIndex = index;
       audio.src = songs[currentIndex].path;
-      audio.preload = "auto"; // Force immediate buffer download
+      audio.preload = "auto";
       trackTitle.textContent = songs[currentIndex].title;
       renderPlaylist();
       
