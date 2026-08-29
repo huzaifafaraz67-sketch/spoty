@@ -100,7 +100,8 @@
     </div>
   </div>
 
-  <audio id="audio"></audio>
+  <!-- Preload audio metadata instantly -->
+  <audio id="audio" preload="metadata"></audio>
 
   <script>
     const files = [
@@ -142,7 +143,6 @@
       "EL QUE DEBE FUNK - FR3ST, DJ MILLYANN (SUPER SLOWED).mp4"
     ];
 
-    // Safely format path for GitHub web servers without double-encoding spaces
     function formatPath(filename) {
       return './' + filename.split('/').map(part => encodeURI(part)).join('/');
     }
@@ -182,21 +182,47 @@
       });
     }
 
+    // Preload next track silently in background
+    function preloadNextTrack() {
+      if (currentIndex >= 0 && currentIndex < songs.length - 1) {
+        const nextTrackUrl = songs[currentIndex + 1].path;
+        const tempLink = document.createElement('link');
+        tempLink.rel = 'preload';
+        tempLink.as = 'fetch';
+        tempLink.href = nextTrackUrl;
+        document.head.appendChild(tempLink);
+      }
+    }
+
+    async function safePlay() {
+      try {
+        await audio.play();
+        playBtn.textContent = '⏸';
+        preloadNextTrack();
+      } catch (err) {
+        if (err.name !== 'AbortError') {
+          console.error("Playback error:", err);
+        }
+      }
+    }
+
     function playSong(index) {
       if (index < 0 || index >= songs.length) return;
+      
+      audio.pause();
       currentIndex = index;
       audio.src = songs[currentIndex].path;
-      audio.play().catch(err => console.error("Playback failed:", err));
-      playBtn.textContent = '⏸';
+      audio.preload = "auto"; // Force immediate buffer download
       trackTitle.textContent = songs[currentIndex].title;
       renderPlaylist();
+      
+      safePlay();
     }
 
     function togglePlay() {
       if (currentIndex === -1 && songs.length > 0) return playSong(0);
       if (audio.paused) {
-        audio.play().catch(err => console.error("Playback failed:", err));
-        playBtn.textContent = '⏸';
+        safePlay();
       } else {
         audio.pause();
         playBtn.textContent = '▶';
