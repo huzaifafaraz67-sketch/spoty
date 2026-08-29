@@ -142,8 +142,13 @@
       "EL QUE DEBE FUNK - FR3ST, DJ MILLYANN (SUPER SLOWED).mp4"
     ];
 
+    // Safely format path for GitHub web servers without double-encoding spaces
+    function formatPath(filename) {
+      return './' + filename.split('/').map(part => encodeURI(part)).join('/');
+    }
+
     let songs = files.map(file => ({
-      path: encodeURIComponent(file),
+      path: formatPath(file),
       title: file.replace(/\.[^/.]+$/, "")
     }));
 
@@ -181,7 +186,7 @@
       if (index < 0 || index >= songs.length) return;
       currentIndex = index;
       audio.src = songs[currentIndex].path;
-      audio.play();
+      audio.play().catch(err => console.error("Playback failed:", err));
       playBtn.textContent = '⏸';
       trackTitle.textContent = songs[currentIndex].title;
       renderPlaylist();
@@ -190,7 +195,7 @@
     function togglePlay() {
       if (currentIndex === -1 && songs.length > 0) return playSong(0);
       if (audio.paused) {
-        audio.play();
+        audio.play().catch(err => console.error("Playback failed:", err));
         playBtn.textContent = '⏸';
       } else {
         audio.pause();
