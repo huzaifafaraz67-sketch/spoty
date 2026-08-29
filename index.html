@@ -3,11 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Spoty Pro - Streaming Player</title>
+  <title>Spoty Pro</title>
   <style>
     :root {
       --bg-dark: #121212;
-      --bg-card: #181818;
       --bg-hover: #282828;
       --primary: #1db954;
       --text-main: #ffffff;
@@ -17,49 +16,34 @@
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; user-select: none; }
     body { background: #000; color: var(--text-main); height: 100vh; display: grid; grid-template-rows: 1fr 90px; overflow: hidden; }
 
-    /* App Structure */
     .app { display: grid; grid-template-columns: 240px 1fr; gap: 8px; padding: 8px; height: 100%; overflow: hidden; }
-    
-    /* Sidebar */
     .sidebar { background: var(--bg-dark); border-radius: 8px; padding: 20px; display: flex; flex-direction: column; gap: 20px; }
-    .logo { font-size: 1.4rem; font-weight: bold; color: var(--text-main); display: flex; align-items: center; gap: 8px; }
+    .logo { font-size: 1.4rem; font-weight: bold; color: var(--text-main); }
     .logo span { color: var(--primary); }
-    .nav-item { color: var(--text-sub); font-weight: bold; cursor: pointer; transition: 0.2s; }
-    .nav-item:hover { color: var(--text-main); }
 
-    /* Main Content */
     .main { background: linear-gradient(#222, var(--bg-dark)); border-radius: 8px; padding: 24px; overflow-y: auto; display: flex; flex-direction: column; gap: 16px; }
-    
-    .header-bar { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
+    .header-bar { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
     .search-input { background: #242424; border: 1px solid #333; color: #fff; padding: 10px 16px; border-radius: 50px; outline: none; width: 100%; max-width: 300px; }
     .search-input:focus { border-color: var(--primary); }
 
-    /* Playlist Table */
     table { width: 100%; border-collapse: collapse; text-align: left; font-size: 0.9rem; }
     th { color: var(--text-sub); border-bottom: 1px solid #333; padding: 12px; }
     td { padding: 12px; border-bottom: 1px solid rgba(255,255,255,0.05); cursor: pointer; }
     tr:hover td { background: var(--bg-hover); color: #fff; }
     tr.active td { color: var(--primary); font-weight: bold; }
 
-    /* Audio Visualizer Canvas */
-    #visualizer { width: 100%; height: 60px; background: rgba(0,0,0,0.2); border-radius: 6px; }
-
-    /* Bottom Player Bar */
     .player { background: #000; border-top: 1px solid #282828; display: grid; grid-template-columns: 1fr 2fr 1fr; align-items: center; padding: 0 24px; gap: 16px; }
     .track-info { font-weight: bold; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .track-info .sub { font-size: 0.75rem; color: var(--text-sub); font-weight: normal; }
 
     .controls { display: flex; flex-direction: column; align-items: center; gap: 8px; }
     .buttons { display: flex; gap: 16px; align-items: center; }
-    .btn-ctrl { background: none; border: none; color: var(--text-sub); cursor: pointer; font-size: 1rem; transition: 0.2s; }
-    .btn-ctrl:hover { color: #fff; }
+    .btn-ctrl { background: none; border: none; color: var(--text-sub); cursor: pointer; font-size: 1rem; }
     .btn-ctrl.active { color: var(--primary); }
     .btn-play { background: #fff; color: #000; border: none; width: 36px; height: 36px; border-radius: 50%; font-weight: bold; cursor: pointer; }
-    .btn-play:hover { transform: scale(1.05); }
 
     .progress-bar { width: 100%; max-width: 500px; display: flex; align-items: center; gap: 10px; font-size: 0.75rem; color: var(--text-sub); }
     .seek-slider { flex: 1; accent-color: var(--primary); cursor: pointer; }
-
     .volume-ctrl { display: flex; justify-content: flex-end; align-items: center; gap: 8px; }
     .volume-slider { width: 80px; accent-color: var(--primary); cursor: pointer; }
   </style>
@@ -69,13 +53,11 @@
   <div class="app">
     <div class="sidebar">
       <div class="logo">Spoty <span>●</span></div>
-      <div class="nav-item">Library</div>
-      <canvas id="visualizer"></canvas>
     </div>
 
     <div class="main">
       <div class="header-bar">
-        <h1>Tracks</h1>
+        <h1>Playlist</h1>
         <input type="text" id="searchInput" class="search-input" placeholder="Search playlist...">
       </div>
 
@@ -84,7 +66,6 @@
           <tr>
             <th style="width: 50px;">#</th>
             <th>Title</th>
-            <th style="width: 100px;">Format</th>
           </tr>
         </thead>
         <tbody id="playlist"></tbody>
@@ -94,17 +75,17 @@
 
   <div class="player">
     <div class="track-info">
-      <div id="trackTitle">No track selected</div>
-      <div class="sub" id="trackSub">MP4 Direct Stream</div>
+      <div id="trackTitle">Select a track</div>
+      <div class="sub">MP4 Direct Stream</div>
     </div>
 
     <div class="controls">
       <div class="buttons">
-        <button class="btn-ctrl" id="shuffleBtn" title="Shuffle">🔀</button>
+        <button class="btn-ctrl" id="shuffleBtn">🔀</button>
         <button class="btn-ctrl" id="prevBtn">⏮</button>
         <button class="btn-play" id="playBtn">▶</button>
         <button class="btn-ctrl" id="nextBtn">⏭</button>
-        <button class="btn-ctrl" id="repeatBtn" title="Repeat">🔁</button>
+        <button class="btn-ctrl" id="repeatBtn">🔁</button>
       </div>
       <div class="progress-bar">
         <span id="currentTime">0:00</span>
@@ -122,17 +103,48 @@
   <audio id="audio"></audio>
 
   <script>
-    // Add your list of MP4 files located in your GitHub repository here
     const files = [
-      "track1.mp4",
-      "track2.mp4",
-      "track3.mp4",
-      "track4.mp4"
+      "gitmum-main/montagem guerreiro.mp4",
+      "gitmum-main/MTG DIABÓLICA (Super Slowed).mp4",
+      "gitmum-main/Nada Nada (Slowed).mp4",
+      "gitmum-main/FUNK UNIVERSO (Slowed).mp4",
+      "gitmum-main/MONTAGEM MONARCA (ULTRA SLOWED).mp4",
+      "gitmum-main/NEXT!.mp4",
+      "gitmum-main/MONTAGEM TOMADA SLOWED.mp4",
+      "gitmum-main/bxkq - LUZ ROJA - Slowed (Official Audio).mp4",
+      "gitmum-main/弥渡山歌（Midu Echoing）.mp4",
+      "gitmum-main/🕯️𝘽𝙖𝙞𝙡𝙖 𝙇𝙚𝙣𝙩𝙤 (𝙎𝙡𝙤𝙬𝙚𝙙 +  𝙍𝙚𝙫𝙚𝙧𝙗).mp4",
+      "gitmum-main/Warriyo - Mortals (feat. Laura Brehm) (Lyrics).mp4",
+      "gitmum-main/funk do bounce .mp4",
+      "gitmum-main/uniraum funk.mp4",
+      "gitmum-main/dream funk.mp4",
+      "gitmum-main/Sem Tempo (Ultra Slowed).mp4",
+      "gitmum-main/FUNK SIGILO (SLOWED).mp4",
+      "gitmum-main/CUTE DEPRESSED.mp4",
+      "gitmum-main/funk abnormal.mp4",
+      "gitmum-main/no batidao.mp4",
+      "gitmum-main/Dark Red (Funk).mp4",
+      "gitmum-main/luz roja x peogadore  .mp4",
+      "gitmum-main/Turu R9 (Ultra Slowed).mp4",
+      "gitmum-main/SPOOKY (PHONK).mp4",
+      "gitmum-main/Funk of Galáctico (Super Slowed).mp4",
+      "gitmum-main/tiki tiki video.mp4",
+      "gitmum-main/NEW TOYS FUNK.mp4",
+      "gitmum-main/TRILLIUM HARDTEKK (SLOWED).mp4",
+      "gitmum-main/contra.mp4",
+      "gitmum-main/MONTAGEM PEGADORA (Extremely Slowed).mp4",
+      "gitmum-main/DON`T STOP - Slowed.mp4",
+      "gitmum-main/Saja Boys - Your Idol (Lyrics) KPop Demon Hunters.mp4",
+      "gitmum-main/REAL MOONSHINE FUNK (Ultra Slowed).mp4",
+      "gitmum-main/MONTAGEM ALQUIMIA (SLOWED).mp4",
+      "gitmum-main/BRODYAGA FUNK.mp4",
+      "gitmum-main/MASHA ULTRAFUNK.mp4",
+      "gitmum-main/EL QUE DEBE FUNK - FR3ST, DJ MILLYANN (SUPER SLOWED).mp4"
     ];
 
     let songs = files.map(file => ({
-      filename: file,
-      title: file.replace(/\.[^/.]+$/, "")
+      path: encodeURI(file),
+      title: file.split('/').pop().replace(/\.[^/.]+$/, "")
     }));
 
     let filteredSongs = [...songs];
@@ -140,7 +152,6 @@
     let isShuffle = false;
     let isRepeat = false;
 
-    // Element Selectors
     const audio = document.getElementById('audio');
     const playlistEl = document.getElementById('playlist');
     const playBtn = document.getElementById('playBtn');
@@ -155,27 +166,24 @@
     const durationEl = document.getElementById('duration');
     const searchInput = document.getElementById('searchInput');
 
-    // Render Table
     function renderPlaylist() {
       playlistEl.innerHTML = '';
       filteredSongs.forEach((song, i) => {
         const tr = document.createElement('tr');
         if (songs.indexOf(song) === currentIndex) tr.className = 'active';
-        tr.innerHTML = `<td>${i + 1}</td><td>${song.title}</td><td>MP4</td>`;
+        tr.innerHTML = `<td>${i + 1}</td><td>${song.title}</td>`;
         tr.onclick = () => playSong(songs.indexOf(song));
         playlistEl.appendChild(tr);
       });
     }
 
-    // Playback Logic
     function playSong(index) {
       if (index < 0 || index >= songs.length) return;
       currentIndex = index;
-      audio.src = songs[currentIndex].filename;
+      audio.src = songs[currentIndex].path;
       audio.play();
       playBtn.textContent = '⏸';
       trackTitle.textContent = songs[currentIndex].title;
-      localStorage.setItem('spoty_last_played', currentIndex);
       renderPlaylist();
     }
 
@@ -190,7 +198,6 @@
       }
     }
 
-    // Next / Previous
     function nextSong() {
       if (isShuffle) {
         let randIndex = Math.floor(Math.random() * songs.length);
@@ -206,7 +213,6 @@
       playSong(prevIndex);
     }
 
-    // Controls Event Listeners
     playBtn.addEventListener('click', togglePlay);
     nextBtn.addEventListener('click', nextSong);
     prevBtn.addEventListener('click', prevSong);
@@ -222,14 +228,10 @@
     });
 
     audio.addEventListener('ended', () => {
-      if (isRepeat) {
-        playSong(currentIndex);
-      } else {
-        nextSong();
-      }
+      if (isRepeat) playSong(currentIndex);
+      else nextSong();
     });
 
-    // Seekbar Updates
     audio.addEventListener('timeupdate', () => {
       if (!isNaN(audio.duration)) {
         seekSlider.max = audio.duration;
@@ -239,41 +241,19 @@
       }
     });
 
-    seekSlider.addEventListener('input', () => {
-      audio.currentTime = seekSlider.value;
-    });
+    seekSlider.addEventListener('input', () => audio.currentTime = seekSlider.value);
+    volumeSlider.addEventListener('input', () => audio.volume = volumeSlider.value / 100);
 
-    volumeSlider.addEventListener('input', () => {
-      audio.volume = volumeSlider.value / 100;
-    });
-
-    // Search Bar Filter
     searchInput.addEventListener('input', (e) => {
       const q = e.target.value.toLowerCase();
       filteredSongs = songs.filter(s => s.title.toLowerCase().includes(q));
       renderPlaylist();
     });
 
-    // Time Formatter
     function formatTime(secs) {
       const m = Math.floor(secs / 60);
       const s = Math.floor(secs % 60);
       return `${m}:${s < 10 ? '0' : ''}${s}`;
-    }
-
-    // Keyboard Shortcuts (Space = Play/Pause, Arrows = Skip)
-    document.addEventListener('keydown', (e) => {
-      if (e.target === searchInput) return;
-      if (e.code === 'Space') { e.preventDefault(); togglePlay(); }
-      if (e.code === 'ArrowRight') nextSong();
-      if (e.code === 'ArrowLeft') prevSong();
-    });
-
-    // Restore Last Session
-    const savedIndex = localStorage.getItem('spoty_last_played');
-    if (savedIndex !== null && songs[savedIndex]) {
-      currentIndex = parseInt(savedIndex);
-      trackTitle.textContent = songs[currentIndex].title;
     }
 
     renderPlaylist();
