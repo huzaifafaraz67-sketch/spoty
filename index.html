@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Spoty Player (Fast Load)</title>
+  <style>
+    :root { --bg: #121212; --primary: #1db954; --text: #fff; }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: sans-serif; user-select: none; }
+    body { background: #000; color: var(--text); height: 100vh; display: grid; grid-template-rows: 1fr 90px; }
+    .app { display: grid; grid-template-columns: 200px 1fr; padding: 8px; gap: 8px; height: 100%; }
+    .sidebar { background: var(--bg); padding: 20px; border-radius: 8px; font-weight: bold; font-size: 1.2rem; }
+    .main { background: linear-gradient(#222, var(--bg)); padding: 20px; border-radius: 8px; overflow-y: auto; }
+    table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+    th { color: #b3b3b3; border-bottom: 1px solid #333; padding: 10px; text-align: left; }
+    td { padding: 12px 10px; border-bottom: 1px solid #1e1e1e; cursor: pointer; }
+    tr:hover { background: rgba(255,255,255,0.1); }
+    tr.active { color: var(--primary); font-weight: bold; }
+    .player { background: #000; border-top: 1px solid #282828; display: flex; align-items: center; justify-content: space-between; padding: 0 20px; }
+    audio { width: 350px; filter: invert(100%) hue-rotate(90deg); }
+  </style>
+</head>
+<body oncontextmenu="return false;">
+  <div class="app">
+    <div class="sidebar">Spoty <span style="color:var(--primary)">●</span></div>
+    <div class="main">
+      <h1>Protected Playlist</h1>
+      <table>
+        <thead><tr><th>#</th><th>Title</th></tr></thead>
+        <tbody id="list"></tbody>
+      </table>
+    </div>
+  </div>
+  <div class="player">
+    <div id="title">Select a song</div>
+    <audio id="audio" controls controlsList="nodownload noplaybackrate"></audio>
+  </div>
+
+  <!-- Load part1.js instantly to get the player running -->
+  <script src="part1.js"></script>
+  <script>
+    document.addEventListener('contextmenu', e => e.preventDefault());
+    document.addEventListener('keydown', e => {
+      if (e.key === 'F12' || (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J' || e.key === 'C')) || (e.ctrlKey && (e.key === 'u' || e.key === 's'))) {
+        e.preventDefault();
+      }
+    });
+
+    function unscramble(str) {
+      const decoded = atob(str);
+      const key = 42;
+      let result = '';
+      for (let i = 0; i < decoded.length; i++) {
+        result += String.fromCharCode(decoded.charCodeAt(i) ^ key);
+      }
+      return result;
+    }
+
+    let songs = [...(window.songsPart1 || [])];
+    const list = document.getElementById('list');
+    const audio = document.getElementById('audio');
+    const title = document.getElementById('title');
+    let current = -1;
+
+    function render() {
+      list.innerHTML = '';
+      songs.forEach((s, i) => {
+        const tr = document.createElement('tr');
+        if (i === current) tr.className = 'active';
+        tr.innerHTML = `<td>${i + 1}</td><td>${s.title}</td>`;
+        tr.onclick = () => play(i);
+        list.appendChild(tr);
+      });
+    }
+
+    function play(i) {
+      current = i;
+      audio.src = unscramble(songs[i].data);
+      audio.play();
+      title.textContent = songs[i].title;
+      render();
+    }
+
+    audio.onended = () => { if (current + 1 < songs.length) play(current + 1); };
+    render();
+
+    // Lazy load parts 2 through 20 in the background
+    async function loadRemainingParts() {
+      for (let i = 2; i <= 20; i++) {
+        await new Promise((resolve) => {
+          const script = document.createElement('script');
+          script.src = `part${i}.js`;
+          script.onload = () => {
+            const partData = window[`songsPart${i}`] || [];
+            songs = songs.concat(partData);
+            render();
+            resolve();
+          };
+          script.onerror = resolve; // Continue even if a part fails
+          document.body.appendChild(script);
+        });
+      }
+    }
+
+    // Delay background loading slightly so initial render is instant
+    setTimeout(loadRemainingParts, 500);
+  </script>
+</body>
+</html>
